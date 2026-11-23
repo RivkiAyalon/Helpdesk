@@ -4,8 +4,7 @@ A support ticket system that turns support emails into tickets and uses AI to cl
 
 ## Students
 
-- _Student name 1_
-- _Student name 2_
+- Rivkah Ayalon-Hirsch
 
 ## Requirements
 
@@ -78,7 +77,47 @@ Run from the project root:
 
 ## Notifier
 
-_To be filled in._
+Claude Code sends a desktop notification when it finishes a task, using the Agent Notifications plugin (`claude-notifications-go`).
+
+### Installation
+
+1. Add the plugin marketplace in Claude Code:
+
+   ```
+   /plugin marketplace add 777genius/agent-notifications
+   ```
+
+2. Install the plugin with `/plugin install`, choosing **user scope** so it works in every project.
+3. Run the plugin's setup command:
+
+   ```
+   /claude-notifications-go:init
+   ```
+
+### Windows fix: `sh` not found
+
+The plugin's Stop hook runs through `sh`, which Windows doesn't have by default. Adding Git for Windows' `bin` folder (for example `C:\Program Files\Git\bin`) to the `PATH` environment variable fixed it.
+
+### Notification event
+
+The notification is triggered by the **Task Complete** event: Claude Code's Stop hook fires when Claude finishes responding to a prompt.
+
+### Screenshot
+
+_Screenshot of the notification goes here._
+
+## Agent review example
+
+Working with an AI agent still needs a person to check its output against the requirements. In this project:
+
+1. **What the agent produced:** Claude first wrote a specification (`SPEC.md`). It used 6 ticket statuses (new, open, auto-replied, escalated, resolved, closed) and its own ticket categories (billing, technical, account, general).
+2. **What I checked:** I compared it with the lecturer's [project-scope.md](project-scope.md).
+3. **What didn't match:**
+   - **Statuses:** the scope defines 3 (Open, Resolved, Closed).
+   - **Categories:** the scope defines General Question, Technical Question and Refund Request.
+   - **Refund handling:** the spec treated refund content as a reason to always send a ticket to a human agent, while the scope makes Refund Request one of the three categories.
+4. **What I did:** I had Claude delete `SPEC.md` and work only from `project-scope.md`.
+5. **Result:** the database schema and the rest of the system use the statuses, categories and roles from the agreed scope.
 
 ## Submission checks (Assignment 1)
 
