@@ -1,0 +1,39 @@
+# ── Environment files (secrets) ─────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Dependencies ────────────────────────────────────────────
+node_modules/
+
+# ── Build output and generated code ─────────────────────────
+dist/
+build/
+*.tsbuildinfo
+server/src/generated/
+
+# ── Logs ────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+
+# ── Editors and OS ──────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ── Android Studio template (not part of the Helpdesk web app) ──
+/app/
+/gradle/
+/.gradle/
+/gradlew
+/gradlew.bat
+/build.gradle.kts
+/settings.gradle.kts
+/gradle.properties
+/local.properties
+/captures/
+.externalNativeBuild/
+.cxx/
