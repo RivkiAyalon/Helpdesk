@@ -25,6 +25,8 @@ Main libraries:
 
 ## Installation
 
+Before you start, make sure Docker Desktop is running and ports 5432, 3000 and 5173 are free.
+
 ```bash
 git clone <repository-url>
 cd Helpdesk
@@ -34,10 +36,10 @@ npm install
 
 # 2. Create the server environment file
 cp server/.env.example server/.env
-#    The defaults match compose.yaml:
+#    No edits needed: the values match the database in compose.yaml:
 #    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/helpdesk?schema=public"
 
-# 3. Start PostgreSQL in Docker
+# 3. Start PostgreSQL in Docker (wait a few seconds for it to be ready)
 npm run db:up
 
 # 4. Create the database tables
@@ -59,6 +61,10 @@ This starts the server and the client together.
 | Health check | http://localhost:3000/api/health |
 
 The client forwards `/api` requests to the server, so http://localhost:5173/api/health works too.
+
+The welcome screen calls `GET /api/health` and shows the server's response:
+
+![Helpdesk welcome screen showing the server health response](docs/welcome-screen.png)
 
 ## All commands
 
@@ -119,6 +125,16 @@ Working with an AI agent still needs a person to check its output against the re
 4. **What I did:** I had Claude delete `SPEC.md` and work only from `project-scope.md`.
 5. **Result:** the database schema and the rest of the system use the statuses, categories and roles from the agreed scope.
 
+## Known issues and incomplete parts
+
+- **Only Phase 1 is built.** Login, user management, tickets, AI features, email and the dashboard (Phases 2–8 in [implementation-plan.md](implementation-plan.md)) are not built yet. The database tables for them exist, but there are no API endpoints or pages for them.
+- **No admin account yet.** The admin user that "comes with the system" will be created by a setup script in Phase 2.
+- **Notifier on Windows needs Git's `bin` folder in `PATH`.** The plugin's Stop hook runs through `sh`; without it, no notification appears.
+- **Notifications don't show while Windows "Do not disturb" is on.**
+- **The database passwords are for local development only.** `compose.yaml` and `server/.env.example` use `postgres` / `postgres`. Real deployments must use their own credentials.
+- **`npm audit` reports 3 high-severity warnings.** They come from `effect`, a library used by the Prisma command-line tool (`prisma` → `@prisma/config`), not by the running app. The suggested `npm audit fix --force` would install breaking changes, so it was not applied.
+- **Leftover Android Studio files.** The project folder on the development machine also holds an unrelated Android Studio template (`app/`, Gradle files). It is excluded by `.gitignore` and is not in the repository.
+
 ## Submission checks (Assignment 1)
 
 All checks were run on 2026-11-23 on Windows 11 with the versions listed above.
@@ -133,6 +149,17 @@ All checks were run on 2026-11-23 on Windows 11 with the versions listed above.
 | 6 | PostgreSQL data persists after `docker compose down` / `up -d` (container deleted and recreated) | Pass: the test record was still there; data lives in the `helpdesk_pgdata` volume |
 | 7 | Prisma test script (`npm run db:test`) saves and reads back a sample record | Pass: 5 of 5 checks passed |
 | 8 | Server type-checks (`npm run typecheck -w server`) | Pass |
+| 9 | Notifier: a desktop notification appears when Claude Code finishes a task (Task Complete, Stop hook) | Pass: Task Complete notification shown, see [docs/notifier.png](docs/notifier.png) |
+| 10 | Clean copy: fresh `git clone` into a temporary folder, following only this README | Pass after one fix (see below): client and `/api/health` both returned HTTP 200 |
+
+### Clean copy check details
+
+1. Cloned the repository into a temporary folder. It had no `.env` and no `node_modules`.
+2. Followed the [Installation](#installation) and [Running the app](#running-the-app) steps exactly, against a new, empty database volume.
+3. `npm install` installed everything and generated the Prisma client.
+4. **Problem found:** `server/.env.example` held placeholder credentials (`USER:PASSWORD`), so `npm run db:migrate` could not log in to the database. **Fix:** `.env.example` now holds the same local values as `compose.yaml`, so the copied `.env` works with no edits.
+5. With the fix, `npm run db:migrate` created all tables, and `npm run dev` started both apps. The client (port 5173), `/api/health` (port 3000) and `/api/health` through the client all returned HTTP 200. The welcome screen showed "Server and database are up".
+6. Stopped everything, deleted the temporary database volume and the temporary folder.
 
 ### Persistence test details
 
