@@ -104,7 +104,7 @@ The notification is triggered by the **Task Complete** event: Claude Code's Stop
 
 ### Screenshot
 
-_Screenshot of the notification goes here._
+![Claude Code desktop notification after a task completes](docs/notifier.png)
 
 ## Agent review example
 
